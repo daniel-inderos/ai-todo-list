@@ -39,7 +39,7 @@ class CategoryClassifier {
           role: 'user', 
           content: prompt 
         }],
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.1-8b-instant',  // Changed to faster model
         temperature: 0.3,
         max_tokens: 10,
       }).catch(error => {
