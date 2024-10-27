@@ -55,11 +55,3 @@ npm run dev
 ## Environment Setup
 
 You'll need to provide your Groq API key during the onboarding process. The key will be securely stored in your browser's local storage.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
