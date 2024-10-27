@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import CategoryClassifier from '../utils/categoryClassifier';
+import { useUserContext } from './UserContext';
 
 interface Todo {
   id: string;
@@ -39,6 +40,7 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [groqApiKey, setGroqApiKey] = useState(() => {
     return localStorage.getItem('groqApiKey') || '';
   });
+  const { occupationType } = useUserContext();
 
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
@@ -59,17 +61,32 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addTodo = async (text: string, dueDate: string, dueTime: string) => {
     const classifier = CategoryClassifier.getInstance();
-    const category = await classifier.categorizeTask(text, groqApiKey);
+    try {
+      console.log('Starting categorization with API key:', groqApiKey ? 'Present' : 'Missing');
+      const category = await classifier.categorizeTask(text, groqApiKey, occupationType);
+      console.log('Categorization result:', category);
 
-    const newTodo: Todo = {
-      id: Date.now().toString(),
-      text,
-      completed: false,
-      category,
-      dueDate: dueDate || new Date().toISOString().split('T')[0],
-      dueTime: dueTime || '12:00'
-    };
-    setTodos([...todos, newTodo]);
+      const newTodo: Todo = {
+        id: Date.now().toString(),
+        text,
+        completed: false,
+        category,
+        dueDate: dueDate || new Date().toISOString().split('T')[0],
+        dueTime: dueTime || '12:00'
+      };
+      setTodos(prevTodos => [...prevTodos, newTodo]);
+    } catch (error) {
+      console.error('Error in addTodo:', error);
+      const newTodo: Todo = {
+        id: Date.now().toString(),
+        text,
+        completed: false,
+        category: occupationType, // Use occupationType as fallback
+        dueDate: dueDate || new Date().toISOString().split('T')[0],
+        dueTime: dueTime || '12:00'
+      };
+      setTodos(prevTodos => [...prevTodos, newTodo]);
+    }
   };
 
   const toggleTodo = (id: string) => {
