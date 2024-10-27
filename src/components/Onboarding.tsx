@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useUserContext } from '../context/UserContext';
+import { useTodoContext } from '../context/TodoContext';
 import { Briefcase, GraduationCap } from 'lucide-react';
 
 const Onboarding = () => {
@@ -8,10 +9,11 @@ const Onboarding = () => {
   const [occupationType, setOccupationType] = useState<'work' | 'school'>('work');
   const [apiKey, setApiKey] = useState('');
   const { completeOnboarding } = useUserContext();
+  const { setGroqApiKey } = useTodoContext();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('groqApiKey', apiKey);
+    setGroqApiKey(apiKey);
     completeOnboarding(name, occupationType);
   };
 
