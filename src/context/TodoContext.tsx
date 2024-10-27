@@ -9,6 +9,7 @@ interface Todo {
   category: string;
   dueDate: string;
   dueTime: string;
+  priority: 'high' | 'medium' | 'low';
 }
 
 interface TodoContextType {
@@ -23,6 +24,9 @@ interface TodoContextType {
   getCategoryCount: (category: string) => number;
   setDarkMode: (enabled: boolean) => void;
   setGroqApiKey: (key: string) => void;
+  customCategories: string[];
+  addCustomCategory: (category: string) => void;
+  deleteCustomCategory: (category: string) => void;
 }
 
 const TodoContext = createContext<TodoContextType | undefined>(undefined);
@@ -39,6 +43,11 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [groqApiKey, setGroqApiKey] = useState(() => {
     return localStorage.getItem('groqApiKey') || '';
+  });
+  const [customCategories, setCustomCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('customCategories');
+    // Initialize with Health and Shopping by default
+    return saved ? JSON.parse(saved) : ['Health', 'Shopping'];
   });
   const { occupationType } = useUserContext();
 
@@ -59,34 +68,64 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('groqApiKey', groqApiKey);
   }, [groqApiKey]);
 
+  useEffect(() => {
+    localStorage.setItem('customCategories', JSON.stringify(customCategories));
+  }, [customCategories]);
+
   const addTodo = async (text: string, dueDate: string, dueTime: string) => {
     const classifier = CategoryClassifier.getInstance();
     try {
-      console.log('Starting categorization with API key:', groqApiKey ? 'Present' : 'Missing');
-      const category = await classifier.categorizeTask(text, groqApiKey, occupationType);
-      console.log('Categorization result:', category);
+      // First, clean the text and get scheduling info
+      const cleanedText = await classifier.cleanTaskText(text, groqApiKey);
+      console.log('Cleaned text:', cleanedText);
+
+      // Get category and schedule suggestions
+      const [category, schedule] = await Promise.all([
+        classifier.categorizeTask(cleanedText, groqApiKey, occupationType),
+        classifier.suggestTaskSchedule(text, groqApiKey, new Date().toISOString(), todos.slice(-5))
+      ]);
+
+      console.log('Category determined:', category);
+      console.log('Schedule suggested:', schedule);
+
+      // Use provided date/time if set, otherwise use AI suggestions
+      const finalTime = dueTime || convertTo12Hour(schedule.suggestedTime);
+      const finalDate = dueDate || schedule.suggestedDate;
 
       const newTodo: Todo = {
         id: Date.now().toString(),
-        text,
+        text: cleanedText,
         completed: false,
         category,
-        dueDate: dueDate || new Date().toISOString().split('T')[0],
-        dueTime: dueTime || '12:00'
+        dueDate: finalDate,
+        dueTime: finalTime,
+        priority: schedule.priority
       };
+
       setTodos(prevTodos => [...prevTodos, newTodo]);
     } catch (error) {
       console.error('Error in addTodo:', error);
+      // Fallback with manual date/time
       const newTodo: Todo = {
         id: Date.now().toString(),
         text,
         completed: false,
-        category: occupationType, // Use occupationType as fallback
+        category: occupationType,
         dueDate: dueDate || new Date().toISOString().split('T')[0],
-        dueTime: dueTime || '12:00'
+        dueTime: dueTime || '12:00 PM',
+        priority: 'medium'
       };
       setTodos(prevTodos => [...prevTodos, newTodo]);
     }
+  };
+
+  // Helper function to convert 24h to 12h format
+  const convertTo12Hour = (time24: string): string => {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
   };
 
   const toggleTodo = (id: string) => {
@@ -104,6 +143,22 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return todos.filter(todo => todo.category === category).length;
   };
 
+  const addCustomCategory = (category: string) => {
+    if (!customCategories.includes(category)) {
+      setCustomCategories([...customCategories, category]);
+    }
+  };
+
+  const deleteCustomCategory = (category: string) => {
+    setCustomCategories(prev => prev.filter(cat => cat !== category));
+    // Optionally move todos in deleted category to 'personal'
+    setTodos(prev => prev.map(todo => 
+      todo.category === category 
+        ? { ...todo, category: 'personal' }
+        : todo
+    ));
+  };
+
   return (
     <TodoContext.Provider value={{
       todos,
@@ -117,6 +172,9 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
       getCategoryCount,
       setDarkMode,
       setGroqApiKey,
+      customCategories,
+      addCustomCategory,
+      deleteCustomCategory,
     }}>
       {children}
     </TodoContext.Provider>

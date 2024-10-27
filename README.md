@@ -1,23 +1,56 @@
-# AI-Powered Smart Tasks
+# Smart Tasks 🚀
 
-A modern, intelligent todo list application that automatically categorizes your tasks using AI. Built with React, TypeScript, and Tailwind CSS.
+A modern, AI-powered task management application built with React, TypeScript, and Tailwind CSS. Smart Tasks automatically categorizes your todos using the Groq AI API and provides a beautiful, personalized experience.
 
-## Features
+![Smart Tasks Screenshot](screenshot.png)
 
-- 🤖 AI-powered task categorization using Groq API
-- 🌓 Dark/Light mode support
-- 📱 Responsive design
-- 🏷️ Automatic task categorization
-- 📅 Due date and time tracking
-- 🎯 Category-based filtering
-- 🎨 Clean, modern UI with Tailwind CSS
+## ✨ Features
 
-## Prerequisites
+- **AI-Powered Task Management**:
+  - Automatic task categorization using Groq's LLaMA model
+  - Smart task text cleaning to remove scheduling information
+  - Intelligent priority assignment (High/Medium/Low)
+  - Automatic schedule suggestions based on task context
+  - Task analysis considering existing schedules
 
-- Node.js (v18 or higher)
-- Groq API key (get one at [console.groq.com](https://console.groq.com/keys))
+- **Smart Categories**: 
+  - All Tasks
+  - Work/School (adapts to your occupation)
+  - Personal
+  - Health
+  - Shopping
+  - Custom categories with preset suggestions
+  - Category-specific icons and colors
 
-## Getting Started
+- **Task Organization**:
+  - Priority levels with visual indicators
+  - Due dates and times
+  - Overdue task highlighting
+  - Relative date display (Today/Tomorrow/Yesterday)
+
+- **User Experience**:
+  - Personalized onboarding flow
+  - Work/Student mode adaptation
+  - Beautiful dark mode with smooth transitions
+  - Responsive design for all devices
+  - Local storage persistence
+  - Clean, modern UI with glass-morphism effects
+
+- **Security**:
+  - Secure API key storage
+  - Protected sensitive information display
+
+## 🛠️ Technologies
+
+- React 18
+- TypeScript
+- Tailwind CSS
+- Groq AI API (LLaMA 3.1)
+- Lucide Icons
+- Local Storage API
+- Vite
+
+## 🚀 Getting Started
 
 1. Clone the repository:
 ```bash
@@ -37,13 +70,12 @@ npm run dev
 
 4. Open [http://localhost:5173](http://localhost:5173) in your browser
 
-## Technology Stack
+## Environment Setup
 
-- **Frontend Framework**: React with TypeScript
-- **Styling**: Tailwind CSS
-- **AI Integration**: Groq API
-- **Build Tool**: Vite
-- **Icons**: Lucide React
+You'll need to provide your Groq API key during the onboarding process. The key will be securely stored in your browser's local storage.
+
+1. Get your API key from [console.groq.com](https://console.groq.com/keys)
+2. Enter it during the onboarding process or later in Settings
 
 ## Available Scripts
 
@@ -52,6 +84,20 @@ npm run dev
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
-## Environment Setup
+## Technology Stack Details
 
-You'll need to provide your Groq API key during the onboarding process. The key will be securely stored in your browser's local storage.
+- **Frontend Framework**: React with TypeScript
+- **Styling**: 
+  - Tailwind CSS with custom configurations
+  - Dark mode support
+  - Glass-morphism effects
+  - Responsive design
+- **AI Integration**: 
+  - Groq API with LLaMA 3.1 model
+  - Smart task categorization
+  - Priority detection (High/Medium/Low)
+  - Schedule suggestions
+- **Build Tool**: Vite
+- **Icons**: Lucide React
+- **State Management**: React Context API
+- **Storage**: Browser Local Storage
